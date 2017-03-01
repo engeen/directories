@@ -1,0 +1,29 @@
+<%# byebug %>
+<% date_format = defined?(date_format) ? date_format : 'YYYY-mm-dd' %>
+<% date_format ||= 'DD.MM.YYYY' %>
+<% placeholder = defined?(placeholder) ? placeholder : '' %>
+<div class='input-group date'>
+<%= f.text_field field.to_sym, class: "form-control", disabled: disabled, id: "#{field_id_for(f,field, true)}", placeholder: placeholder, title: placeholder  %>
+<span class="input-group-addon">
+  <span class="glyphicon glyphicon-calendar"></span>
+</span>
+</div>
+
+<%
+  default_date = _chash[:default_date]
+  if default_date.present?
+    default_date = _chash[:default_date].is_a?(Proc) ? _chash[:default_date].call : _chash[:default_date]
+    default_date = default_date.to_s('iso')
+  end
+%>
+
+<script type='text/javascript'>
+//debugger;
+function init_datepicker_<%= field_id_for(f,field,true)%>() {
+  $('#<%= field_id_for(f,field,true)%>').datetimepicker({
+    defaultDate: '<%= default_date %>' || null,
+    format: '<%= date_format %>'
+  });
+}
+onLoad(init_datepicker_<%= field_id_for(f,field,true)%>);
+</script>

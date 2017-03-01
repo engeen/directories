@@ -1,0 +1,40 @@
+<% _chash = control_for(field) %>
+<% if !_chash || can_render?(_chash) %>
+	<% if _chash && _chash[:control] == :hidden %>
+		<%= render "directories/controls/#{_chash[:control]}_control", f: f, field: field, _chash: _chash, disabled: disabled if _chash && can_render?(_chash) %>
+	<% else %>
+		<div class='form-group <%= "has-error" if f.object.errors[field].any? || f.object.errors["#{field}_id"].any? %>'>
+
+			<% _label_options = { class: "col-md-2 text-right"} %>
+			<% if _chash && _chash[:control]==:inplace_popup_selector
+				#byebug
+				_label_options[:for] = "#{field_id_for(f,field,true)}_value"
+			 end %>
+       <%# byebug if field == :subject %>
+			<%= f.label field.to_sym, scope_t(resource, field), _label_options %>
+
+
+			<div class='col-md-10'>
+				<% assoc = resource.class.reflect_on_association(field) %>
+				<% if resource.class.reflect_on_association(field) %>
+					<% if assoc.macro == :belongs_to %>
+						<%= render "directories/controls/#{_chash[:control]}_control", f: f, field: field, _chash: _chash, disabled: (disabled || _chash[:disabled]) if _chash && can_render?(_chash) %>
+						<%= render "directories/controls/selectivity_control", f: f, field: field, disabled: disabled unless _chash %>
+					<% end %>
+					<% if assoc.macro == :has_many %>
+					<% end %>
+				<% else %>
+						<%= render "directories/controls/#{_chash[:control]}_control", f: f, field: field, _chash: _chash, disabled: (disabled || _chash[:disabled]) if _chash && can_render?(_chash) %>
+						<%= render "directories/controls/text_control", f: f, field: field, disabled: disabled unless _chash %>
+				<% end %>
+				<% if f.object.errors[field].any? %>
+					<div class="note note-error"><%= f.object.errors[field].join(', ') %></div>
+				<% end %>
+
+				<% if f.object.errors["#{field}_id"].any? %>
+					<div class="note note-error"><%= f.object.errors["#{field}_id"].join(', ') %></div>
+				<% end %>
+		  </div>
+		</div>
+	<% end %>
+<% end %>

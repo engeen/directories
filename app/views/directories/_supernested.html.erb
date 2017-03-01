@@ -1,0 +1,29 @@
+<% if field.is_a?(Hash)  %>
+  <% key = field.keys.first %>
+  <fieldset>
+    <% if field.has_key?(:fieldset) %>
+      <legend><%= scope_t(f.object, key) %></legend>
+    <% end %>
+    <%# byebug %>
+  	<% assoc = resource.class.reflect_on_association(key) %>
+  	<% if assoc && assoc.macro != :has_many %>
+  		<% f.object.send("build_#{field.keys.first}") if f.object.send(field.keys.first).nil? %>
+  		<%= f.fields_for :"#{field.keys.first}", f.object.send("#{field.keys.first}") do |n| %>
+  			<%= n.hidden_field :id %>
+  			<% field[field.keys.first].each do |subfield| %>
+  				<% next if subfield == :id %>
+
+          <%# byebug %>
+  				<%= render "directories/supernested", f: n, field: subfield, resource: n.object %>
+  			<% end %>
+  		<% end %>
+  	<% else #has_many%>
+  		<div class="nested-items">
+  			<h5><%= t("directory.#{field.keys.first.to_s.singularize}.title") %></h5>
+  			<% _object = f.object.send("#{field.keys.first}").build %>
+  		</div>
+  	<% end %>
+  </fieldset>
+<% else %>
+	<%= render "directories/field", f: f, field: field, resource: resource, disabled: resource && resource.persisted? && f.object != resource %>
+<% end %>

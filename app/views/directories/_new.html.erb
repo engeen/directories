@@ -1,0 +1,34 @@
+<div id='<%= dom_id(resource) %>' class="modal fade">
+<div  class="modal-dialog large">
+  <% options = { remote: true, method: :post,  html: { multipart: true, class: "form-horizontal" }} %>
+  <% url = begin
+        create_url
+      rescue
+        url_for([ @parent_resource || @parent_scope, @resource] ) rescue directories_url(@resource_class.name.underscore)
+      end
+    %>
+  <% options.merge!(url: url ) %>
+  <%= form_for resource, options do |f| %>
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+        ×
+      </button>
+      <h4 class="modal-title"><%= t("directory.#{@parent_resource ? @parent_resource.class.name.underscore + '.' : ''}#{resource.class.name.underscore}.new.title") %></h4>
+    </div>
+    <div class="modal-body">
+
+        <%= render "#{resource.class.name.underscore.pluralize}/form", resource: resource, f: f rescue render "directories/form", resource: resource, f: f  %>
+        <%= render inject_form, resource: resource, f: f  if defined?(inject_form) %>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">
+        <%= t(:'shared.buttons.cancel') %>
+      </button>
+      <%= f.submit t(:'shared.buttons.create'), class: "btn btn-primary" %>
+    </div>
+  </div><!-- /.modal-content -->
+  <% end %>
+</div>
+</div>

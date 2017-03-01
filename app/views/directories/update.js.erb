@@ -1,0 +1,36 @@
+var dom_id ='#edit_<%= dom_id(@resource) %>';
+$(dom_id).modal('hide');
+$('.modal-backdrop').remove();
+$('.modal-open').removeClass('modal-open');
+
+<% if @resource.errors.any? %>
+	<% if lookup_context.exists?("edit", @resource_class.name.tableize, true) %>
+		const renderString = '<%= j render "#{@resource_class.name.tableize}/edit", resource: @resource, formats: [:html] %>';
+	<% else %>
+		const renderString = '<%= j render "directories/edit", resource: @resource, formats: [:html] %>';
+	<% end %>
+	$(dom_id).replaceWith(renderString);
+	$(dom_id).modal();
+<% else %>
+	 if ($( ".crud-<%= @resource.class.name.to_url %>_table" ).length > 0)  {
+//		_aeron_datatables['crud-<%= @resource.class.name.to_url %>_table'].api().ajax.reload();
+		$( ".crud-<%= @resource.class.name.to_url %>_table" ).dataTable().api().ajax.reload();
+		$(dom_id).modal( 'hide' );
+		$('.modal-backdrop').remove();
+    $('.modal-open').removeClass('modal-open');
+	} else {
+		<% unless @parent_resource.present? %>
+			<% if lookup_context.exists?("show", @resource_class.name.tableize, false) %>
+				$('#content').html("<%= j render template: "#{@resource_class.name.tableize}/show", layout: false, formats: [:html] %>");
+			<% else  %>
+        <% if @resource_class == VehicleTypeAirplane %>
+				  $('#content').html("<%= j render template: 'vehicle_types/show', layout: false, formats: [:html] %>");
+        <% else%>
+				  $('#content').html("<%= j render template: 'directories/show', layout: false, formats: [:html] %>");
+        <% end %>
+			<% end %>
+  	<% end %>
+	}
+<% end %>
+$("#info_panel").html('');
+$("#info_panel").html('<%= j capture { flash_messages } %>');

@@ -1,0 +1,25 @@
+	// /debugger;
+<% if @resource.persisted? %>
+	try {
+		console.log($('.crud-<%= @resource.class.name.to_url %>_table').dataTable().api());
+		$('.crud-<%= @resource.class.name.to_url %>_table').dataTable().api().ajax.reload();
+    var $badge = $('ul.nav-tabs > li.active .badge');
+    var amount = parseInt($badge.text()) + 1;
+    $badge.html(amount);
+	} catch (e) {
+		console.log(e);
+	} finally {
+		$('#new_<%= @resource.class.name.to_url %>').modal( 'hide' );
+		$('.modal-backdrop').remove();
+    $('.modal-open').removeClass('modal-open');
+		$(document).trigger( "<%= @resource.class.name.underscore %>:created", ['<%= @resource.id %>']);
+	}
+<% else %>
+
+	const renderString = '<%= j render "new", resource: @resource %>';
+	$('#new_<%= @resource.class.name.to_url %>').modal( 'hide' );
+	$('.modal-backdrop').remove();
+	$('#new_<%= @resource.class.name.to_url %>').replaceWith(renderString);
+	$('#new_<%= @resource.class.name.to_url %>').modal();
+<% end %>
+$("#info_panel").html('<%= j capture { flash_messages } %>');

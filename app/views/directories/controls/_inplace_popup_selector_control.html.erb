@@ -1,0 +1,89 @@
+<% value = _chash[:value] %>
+<% popup_title = _chash[:title] || t(:"directory.#{field}.popup.title") %>
+<% field = transform_id(field) %>
+<% url = _chash[:url] || "/dir/#{field}/inplace_popup" %>
+<% parent_object = @resource_class.to_s.underscore %>
+<% popup_id = "#{field_id_for(f,field, true)}_popup" %>
+
+
+
+<div class="input-group inplace-popup">
+  <% if f.object.send(field) %>
+    <%#= text_field_tag nil, f.object.send(field).send(value || 'id'), class: "form-control", disabled: disabled, id: "#{field_id_for(f,field,true)}_value" %>
+    <input type="text" class="form-control" id="<%= field_id_for(f,field,true) %>_value" value="<%= f.object.send(field).send(value || 'id')%>" <%= disabled ? "disabled='disabled'" : '' %> />
+  <% else %>
+    <input type="text" class="form-control" id="<%= field_id_for(f,field,true) %>_value" <%= disabled ? "disabled='disabled'" : '' %> />
+  <% end %>
+  <span class="input-group-addon hide" id="<%= field_id_for(f,field,true) %>_remove">
+    <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
+  </span>
+  <span class="input-group-addon popup-open" id="<%= field_id_for(f,field,true) %>_popup_inplace"
+    <%= raw "data-filtered-by='#{ _chash[:parents].map{|p| [field_id_for(f,p), p]}.to_json }'" if _chash.has_key?(:parents) %> >
+    <span class="glyphicon glyphicon-search"></span>
+  </span>
+</div>
+
+<%= f.hidden_field :"#{field}_id", id: "#{field_id_for(f,field,true)}_id" %>
+<% if f.object.respond_to?("#{field}_type") && _chash[:polymorphic].present? %>
+  <%= f.hidden_field "#{field}_type", value: _chash[:polymorphic] %>
+<% end %>
+
+<script type="text/javascript">
+  onLoad(function() {
+  <% if _chash.has_key?(:children) %>
+    $('#<%= field_id_for(f,field,true) %>_id').change(function() {
+      inplaceResetChildren(<%= raw _chash[:children].map{|c| field_id_for(f, c, true) }.to_json %>);
+    });
+  <% end %>
+
+  var input = $("#<%= field_id_for(f,field,true) %>_id");
+  var domID = "<%= popup_id %>";
+  var valueInput = $("#<%= field_id_for(f,field,true) %>_value");
+  var removeInput = $("#<%= field_id_for(f,field,true) %>_remove");
+  var id = "<%= popup_id %>_placeholder";
+
+  <% if f.object.send(field) %>
+    <% obj_value = raw f.object.send(field).send(value || 'id') %>
+    valueInput.val("<%= j obj_value %>")
+    removeInput.removeClass('hide');
+  <% end %>
+  <% unless disabled %>
+    $("#<%= field_id_for(f,field,true) %>_value").bind('focus', loadPopupWrapper_<%= popup_id %>);
+    $("#<%= field_id_for(f,field,true) %>_popup_inplace").bind('click', loadPopupWrapper_<%= popup_id %>);
+    $("#<%= field_id_for(f,field,true) %>_remove").bind('click', removeValue)
+  <% end %>
+
+  function loadPopupWrapper_<%= popup_id %>(e) {
+    console.log(e.which);
+    var url = "<%= url %>";
+    //var template = "<%#= j render "directories/inplace_popup", locals: { dom_id: "#{popup_id}", title: popup_title } %>"
+    var value = "<%= value || "id" %>";
+    var _filters='';
+      <% if _chash.has_key?(:parents) %>
+       _filters = $("#<%= field_id_for(f,field,true) %>_popup_inplace").data('filtered-by').map(function(elem) {
+         var domName = `<%= f.options[:html].present? ? ("#" + f.options[:html][:id]) : "" %> [name='${elem[0].replace("_"+elem[1],'')}[${elem[1]}_id]']`;
+         console.log(domName);
+          var _selected_val =  $(domName).val();
+          if ($.isNumeric(_selected_val)) {
+            return  `filters[${elem[1]}_id]=${ _selected_val }&`;
+          } else {
+            return _selected_val.split(' ').map(function(e) { return `filters[${elem[1]}_id][]=${e}&` }).join("")
+            //return null;
+          }
+      }).join("&");
+    <% end %>
+
+    console.log(url);
+    loadPopup(url, _filters, '<%= field_id_for(f,field,true) %>', domID, valueInput, removeInput, id, value);//, template, value);
+  }
+
+  function removeValue() {
+    if (!$(this).hasClass('hide')) {
+      $("#<%= field_id_for(f,field,true) %>_value").val('');
+      input.val('').trigger('change');
+      $(this).addClass('hide');
+    }
+  }
+});
+
+</script>

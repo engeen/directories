@@ -1,0 +1,37 @@
+
+var dom_id ='#edit_<%= dom_id(@resource) %>';
+$(dom_id).modal('hide');
+$('.modal').modal('hide');
+$('body').removeClass('modal-open');
+$('.modal-backdrop').remove();
+
+<% if @resource.errors.any? %>
+<% else %>
+	 if ($( ".crud-<%= @resource.class.name.to_url %>_table" ).length > 0)  {
+		$( ".crud-<%= @resource.class.name.to_url %>_table" ).dataTable().api().ajax.reload()
+		$(dom_id).modal( 'hide' );
+		$('.modal-backdrop').remove();
+	} else {
+		<% unless @parent_resource.present? %>
+			<% if lookup_context.exists?("show", @resource_class.name.tableize, false) %>
+				$('#content').html("<%= j render template: "#{@resource_class.name.tableize}/show", layout: false, formats: [:html] %>");
+			<% else  %>
+				$('#content').html("<%= j render template: 'directories/show', layout: false, formats: [:html] %>");
+			<% end %>
+  	<% end %>
+	}
+<% end %>
+$("#info_panel").html('<%= j capture { flash_messages } %>');
+
+<% if @requires_comments_for.include?(@resource.state.to_s) %>
+  <% if @modal_options.present? && @modal_options.is_a?(Hash) %>
+    <% if @modal_options[:title].present? %>
+      var old_title = $('#add_comment_dialog label').html();
+      $('#add_comment_dialog label').html('<%= @modal_options[:title] %>');
+      $('#add_comment_dialog').on('hidden.bs.modal', function () {
+        $('#add_comment_dialog label').html(old_title);
+      });
+    <% end %>
+  <% end %>
+	$('#add_comment_dialog').modal('show');
+<% end %>

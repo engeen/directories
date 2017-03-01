@@ -1,0 +1,30 @@
+<%= datatable_widget :"crud-#{@resource_class.name.to_url}",
+                     icon: "fa-table",
+                     title: t(:"directory.#{@resource_class.name.underscore}.title"),
+                     source_url: (url_for([@parent_scope, @resource_class, (params[:filters] || {}).merge(datatables: true, format: :json, scope: @parent_scope)]) rescue directories_url(@resource_class.name.underscore,  (params[:filters] || {}).merge(datatables: true, format: :json)) ),
+                     columns: directory_columns_for(@resource_class),
+                     buttons: [
+                      {
+                        text: "Добавить",
+                        class: "btn btn-primary",
+                        url: (url_for([:new, @parent_scope, @resource_class.name.singularize.to_url, (params[:filters] || {}).merge(format: :js)]) rescue new_directory_url(@resource_class.name.underscore, (params[:filters] || {}).merge(format: :js) ))
+                      }
+                     ] do %>
+
+    <thead>
+      <tr>
+        <% @resource_class.directory_fields.each do |field| %>
+          <% if field.is_a?(Hash) %>
+            <% field[field.keys.first].each do |subfield| %>
+              <th><%= t(:"directory.#{@resource_class.name.underscore}.fields.#{field}.#{subfield}") %></th>
+            <% end %>
+          <% else %>
+            <th><%= t(:"directory.#{@resource_class.name.underscore}.fields.#{field}") %></th>
+          <% end %>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+
+<% end %>

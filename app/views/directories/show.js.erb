@@ -1,0 +1,8 @@
+const renderString = '<%= j render "show_info_modal", resource: @resource %>';
+var dom_id ='#show_<%= dom_id(@resource) %>';
+if ($(dom_id).length > 0) {
+	$(dom_id).replaceWith(renderString);
+} else {
+	$('#content').append(renderString);
+}
+$(dom_id).modal();

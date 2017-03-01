@@ -1,0 +1,39 @@
+<div class="btn-group pull-right" id='<%= "#{@resource.class.name.singularize.underscore}_actions"  %>'>
+	<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+		Действия <span style='color: white' class="caret"></span>
+	</button>
+	<ul class="dropdown-menu">
+  		<%= custom_content if defined?(custom_content) %>
+
+		<% if can? :edit, @resource %>
+		<li>
+			<%= link_to t(:"shared.buttons.edit"), ( url_for([:edit, @parent_scope, @resource, format: :js]) rescue directory_url(:edit, @resource.class.name.underscore, @resource)), remote: true %>
+		</li>
+		<% end %>
+
+
+		<% if @resource.respond_to?(:printable?) && @resource.printable? && can?(:print, @resource) %>
+			<li><%= link_to t("shared.printable"), (url_for([@resource.class.name.demodulize.underscore.to_sym, @parent_scope, @resource, format: :pdf]) rescue '#'), target: '_blank' %></li>
+		<% end %>
+		<% #byebug %>
+
+		<% if @resource.respond_to?(:aasm) && current_user.can_any?(@resource.available_steps, @resource) %>
+		<%#byebug%>
+			<li class="divider"></li>
+
+			<%  @resource.available_steps.each do |step| %>
+				<% if can? step, @resource %>
+					<%# byebug %>
+					<li><%= link_to t("#{@resource.class.name.pluralize.underscore}.transitions.#{step}"), (url_for([:state, @parent_scope, @resource, state: step, format: :js]) rescue '#'), method: :put, remote: true %></li>
+				<% end %>
+			<% end %>
+		<% end %>
+		<% if can? :destroy, @resource %>
+		<li class="divider"></li>
+		<li>
+	      <%= link_to t(:'shared.buttons.delete'), ( url_for([@parent_scope, @resource]) rescue directory_url(@resource.class.name.underscore, @resource)) , method: :delete, data: {confirm: t(:"directory.#{ @resource.class.name.underscore}.delete.confirmation", default: t('shared.confirmations.delete')) } %>
+		</li>
+		<% end %>
+		<li class="no-action"><a href="#"><%= t('shared.list.no_actions') %></a></li>
+	</ul>
+</div>

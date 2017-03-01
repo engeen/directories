@@ -1,0 +1,208 @@
+<% _random_table_id = [*'a'..'z', *'A'..'Z', *0..9].shuffle.permutation.next.join %>
+<!-- Widget ID (each widget will need unique ID)-->
+<div class="row" data-widget-editbutton="false">
+  <!-- widget options:
+  usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+  data-widget-colorbutton="false"
+  data-widget-editbutton="false"
+  data-widget-togglebutton="false"
+  data-widget-deletebutton="false"
+  data-widget-fullscreenbutton="false"
+  data-widget-custombutton="false"
+  data-widget-collapsed="true"
+  data-widget-sortable="false"
+
+  -->
+
+  <!-- widget div-->
+  <div class='col-md-12'>
+
+    <!-- widget content -->
+    <div class="widget_body">
+
+      <table id='<%= _random_table_id %>_table' class="table table-striped table-bordered table-hover <%= "#{id}_table" %>" width="100%">
+        <%= body %>
+      </table>
+
+    </div>
+    <!-- end widget content -->
+
+  </div>
+  <!-- end widget div -->
+
+</div>
+<!-- end widget -->
+
+
+
+
+
+
+  <script type="text/javascript">
+
+
+    function initTable_<%= _random_table_id %>() {
+
+
+      //pageSetUp();
+
+      /* // DOM Position key index //
+
+      l - Length changing (dropdown)
+      f - Filtering input (search)
+      t - The Table! (datatable)
+      i - Information (records)
+      p - Pagination (paging)
+      r - pRocessing
+      < and > - div elements
+      <"#id" and > - div with an id
+      <"class" and > - div with a class
+      <"#id.class" and > - div with an id and class
+
+      Also see: http://legacy.datatables.net/usage/features
+      */
+
+      /* BASIC ;*/
+      // var responsiveHelper_dt_basic = undefined;
+      // var responsiveHelper_datatable_fixed_column = undefined;
+      // var responsiveHelper_datatable_col_reorder = undefined;
+      // var responsiveHelper_datatable_tabletools = undefined;
+
+      var breakpointDefinition = {
+        tablet : 1024,
+        phone : 480
+      };
+
+      // console.log(tableName);
+      // $(tableName).dataTable();
+
+      //_aeron_datatables - global variable should be defined
+      /* COLUMN SHOW - HIDE */
+      var _local_table = $('#<%= "#{_random_table_id}_table" %>').dataTable({
+        "sDom": "<'dt-toolbar'<'col-xs-12 col-sm-8'B><'col-sm-4 col-xs-12 hidden-xs text-right'Cf>><'col-xs-12 col-sm-8 col-static'r>" +
+            "t"+
+            "<'dt-toolbar-footer'<'col-sm-6 col-xs-12 hidden-xs'i><'col-sm-6 col-xs-12'p>>",
+        "autoWidth" : true,
+        "colVis": {
+            "buttonText": "Показать / Скрыть"
+        },
+        // "processing": true,
+        "serverSide": true,
+        "ajax": '<%= source_url %>',
+        rowId: function(item) { return `row_${item.id}`; },
+        "pageLength": 30,
+        "deferRender": true,
+        "columns": [
+          <% columns.each do |column| %>
+            {
+              <% if column.is_a?(Hash) %>
+
+                  "data": "<%= column[:data] %>",
+                  "name" : "<%= column[:field] %>",
+                  <% if column.has_key?(:template) %>
+                   render: function ( data, type, item, meta ) {
+                     var _tmpl;
+                      try {
+                        _tmpl = `<%= j render column[:template] %>`;
+                      } catch(err) {
+                        console.log("error rendering column for");
+                        console.log(item);
+                        console.log(err);
+                      }
+                      return _tmpl;
+                    }
+                  <% end %>
+
+              <% else %>
+                "data" : "<%= column %>",
+                "name" : "<%= column %>",
+                 render: function ( data, type, item, meta ) {
+                    //debugger;
+                    if (data && data.html) {
+                      return data.html;
+                    } else {
+                      return data;
+                    }
+                  }
+
+              <% end %>
+             },
+           <% end %>
+        ],
+        select: {
+          style: 'single'
+        },
+        "order": [ <%= raw defined?(order_by) ? order_by : "[0, 'asc']" %> ],
+        "buttons": [
+          <% buttons.each do |button|
+            button = {
+              method: "GET",
+              data_type: "script"
+            }.merge(button)
+          %>
+           {
+            text: '<%= button[:text] %>',
+            className: "<%= button[:class] %>",
+            action: function(e,dt) {
+              //console.log(dt.rows( { selected: true } ).data()[0].id );
+              $.ajax(
+                  {
+                    url: `<%=  URI.unescape(button[:url]) %>`,
+                    method: '<%= button[:method].to_s %>',
+                    dataType: '<%= button[:data_type].to_s %>',
+                    <% if button[:data] %>
+                      data: <%=  button[:data].to_json.html_safe %>,
+                    <% end %>
+
+                  }
+                )<% if button[:done] %>.done(function(response) {
+                    <%=  button[:done].html_safe %>
+                 })<% end %>;
+              }
+          },
+          <% end %>
+
+        ],
+
+          "oLanguage": {
+          select: {
+              rows: " Выбрано записей: %d"
+
+          },
+          "sSearch": '<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>',
+          "sEmptyTable":    "Записи не найдены",
+          "sInfo":          "Показаны записи с _START_ по _END_ из _TOTAL_",
+          "sInfoEmpty":     "Нет записей",
+          "sInfoFiltered":  "(отфильтровано из _MAX_ записей)",
+          "sInfoPostFix":   "",
+          "sInfoThousands":   ".",
+          "sLengthMenu":    "_MENU_ EintrГ¤ge anzeigen",
+          "sLoadingRecords":  "Загружается...",
+          "sProcessing":    "Подождите...",
+          "sZeroRecords":   "Записи не найдены.",
+          "oPaginate": {
+            "sFirst":     "Первый",
+            "sPrevious":  "Назад",
+            "sNext":      "Вперед",
+            "sLast":      "Конец"
+          },
+          "oAria": {
+            "sSortAscending":  ": по возрастанию",
+            "sSortDescending": ": по убыванию"
+          }
+        }
+
+      });
+
+
+      <% if defined?(on_select) %>
+          _local_table.on('click', 'tr', <%=  on_select.html_safe %> );
+      <% end %>
+
+    }
+
+
+
+    $(document).ready(function() { initTable_<%= _random_table_id %>(); });
+    </script>

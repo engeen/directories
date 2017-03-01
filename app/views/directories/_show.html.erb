@@ -1,0 +1,100 @@
+<%= directory_render "show_header" %>
+<div id="info_panel">
+  <%= capture { flash_messages } %>
+</div>
+
+<div class='row well'>
+
+	<div class="col-sm-12">
+    <%= render 'right_side' %>
+    <% has_right_side = content_for? :right_side %>
+		<div class='col-md-<%= has_right_side ? "8" : "12" %> col-sm-12'>
+			<div class="panel-group smart-accordion-default" id="<%= @resource_class.name.to_url %>_<%= @resource.id %>_accordion">
+				<%= directory_render "show_info", resource: @resource %>
+			</div>
+		</div>
+
+    <div class="col-md-4 col-sm-12">
+    <%= yield :right_side %>
+    </div>
+
+	<% if @resource_class.directory_nested.length > 0 || defined?(tabs) %>
+	<div class='col-sm-12'>
+		<h3 class='row-separator-header'>&nbsp;</h3>
+		<div class='panel'>
+		<ul id="<%= @resource_class.name.underscore %>_tabs" class="nav nav-tabs bordered">
+			<% idx = 0 %>
+			<% nested_fields_for @resource_class do |nested,index| %>
+
+				<% #byebug %>
+				<% nested=nested.keys.first if nested.is_a?(Hash) %>
+
+        <% next unless can? :read, @resource => @resource.class.reflect_on_association(nested).class_name.constantize %>
+
+				<%= render "directories/tab_link",
+					tab_id: "nested_#{ idx }",
+					active: idx==0,
+					badge_count: @resource.send(nested).count,
+					title: t(:"directory.#{@resource.class.name.underscore}.#{nested.to_s.singularize}.title") %>
+					<% idx += 1 %>
+			<% end %>
+			<% if defined?(tabs) %>
+				<% tabs.flatten.each do |tab| %>
+					<%= render tab[:tab_data][:partial], tab_id: tab[:tab_data][:tab_id], title: tab[:tab_data][:title], active:  @resource_class.directory_nested.length == 0 && tab[:tab_data][:active] %>
+				<% end %>
+			<% end %>
+		</ul>
+
+		<div id="<%= @resource_class.name.underscore%>_tab_content" class="tab-content padding-10">
+			<% idx = 0 %>
+			<% nested_fields_for @resource_class do |_nested,index| %>
+				<% __nested= _nested.keys.first rescue _nested %>
+				<% next unless can? :read,  @resource => @resource.class.reflect_on_association(__nested).class_name.constantize %>
+				<% _options = {nested: _nested, index: idx } %>
+				<% idx += 1 %>
+
+				<% if _nested.is_a?(Hash) %>
+					<% _options[:nested] = _nested.keys.first %>
+					<% _options[:nested_fields] = _nested[_nested.keys.first] %>
+					<% _nested = _nested.keys.first%>
+				<% end %>
+
+
+
+        <% if directory_template_exist?("show_#{_nested}", { locals: _options } ) %>
+          <%= directory_render "show_#{_nested}", locals: _options %>
+        <% else %>
+          <%= render "show_nested",  _options %>
+        <% end %>
+				<%# if lookup_context.exists?("show_#{_nested}", @resource_class.name.tableize , true)  %>
+					<%#= render "#{@resource_class.name.tableize}/show_#{_nested}", _options %>
+				<%# else %>
+					<%#= render "show_nested", _options %>
+				<%# end %>
+			<% end %>
+
+			<% if defined?(tabs) %>
+				<% tabs.flatten.each do |tab| %>
+					<%= tab[:tab_content].html_safe %>
+				<% end %>
+			<% end %>
+
+		</div>
+		</div>
+	</div>
+	<% end %>
+
+</div>
+<%= modal title: t(:'shared.comment'), id: 'add_comment_dialog', button: { class: 'hidden' } do %>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="audit_log_comment"><%= t(:'shared.comment_text') %></label>
+      <textarea class="form-control" name="audit_log_comment" id="comment_text"></textarea>
+      <p id="empty_comment_error" class="hidden text-danger"><%= t(:'shared.comment_nonempty') %></p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" id="cancel_add_comment" data-dismiss="modal"><%= t(:'shared.cancel') %></button>
+    <button type="button" class="btn btn-success" id="confirm_add_comment"><%= t(:'shared.comment') %></button>
+  </div>
+<% end %>

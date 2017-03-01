@@ -1,0 +1,10 @@
+<div id="<%= field_id_for(f,field) %>_select"
+		 class="chord-terminal-select"
+		 data-text-field='<%= _chash[:display_field] rescue "name"%>'
+     data-name="<%= field_id_for(f,field) %>"
+     data-value="<%= f.object.send(field).send( (_chash[:display_field] rescue :name) ) if f.object.send(field) %>"
+     >
+
+</div>
+<%= f.hidden_field :"#{field}_id" %>
+<%= render "directories/controls/new_selectivity_script", builder: f, resource: f.object, field: field, _chash: (_chash rescue nil)  %>

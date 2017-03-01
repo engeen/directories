@@ -1,0 +1,7 @@
+	<li class="<%=  "active"  if active if defined?(active)  %>">
+		<a href="#<%= tab_id %>" data-toggle="tab" aria-expanded="true"><%= title %> 
+		<% if defined?(badge_count) %>
+			<span class="badge bg-color-blue txt-color-white"><%= badge_count %></span>
+		<% end %>
+		</a>
+	</li>

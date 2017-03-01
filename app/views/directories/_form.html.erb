@@ -1,0 +1,24 @@
+<% @_selectivities = [] %>
+<fieldset>
+	<legend>Введите параметры:</legend>
+		<%= f.hidden_field :id %>
+    <div class="form-group">
+      <div class="col-md-2"></div>
+      <div class="col-md-10 text-danger">
+        <% f.object.errors[:base].each do |err_msg| %>
+          <%= err_msg %>
+        <% end %>
+      </div>
+    </div> 
+		<% edit_directory_fields_for(resource).each do |field| %>
+			<% next if field==:id %>
+			<%= render "directories/supernested", f: f, field: field, resource: resource %>
+		<% end %>
+</fieldset>
+
+
+
+
+<% if @_selectivities.length > 0 %>
+	<%= render "directories/controls/selectivity_scripts", resource: resource %>
+<% end %>

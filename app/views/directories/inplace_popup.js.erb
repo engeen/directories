@@ -1,0 +1,6 @@
+if ($('#<%= params[:popup_id] %>').length > 0) {
+} else 
+{
+	$('body').append('<%= j render "directories/inplace_popup" %>');
+}
+$('#<%= params[:popup_id] %>').modal();

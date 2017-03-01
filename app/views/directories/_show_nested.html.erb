@@ -1,0 +1,52 @@
+<div class="tab-pane fade in <%= "active" if index==0 %>" id="nested_<%= index %>">
+	<p>
+			<% nested_class_name = @resource_class.reflect_on_association(nested).class_name %>
+			<% nested_class = nested_class_name.constantize %>
+			<% _nested_fields = nested_fields rescue nested_class.directory_fields %>
+
+			<% _btns = [] %>
+			<% if nested_class.edit_directory_fields.present? %>
+			  <% _btns_overrides = buttons_overrides_for(nested_class) %>
+			  <% if !_btns_overrides.nil? %>
+			    <% _btns = _btns_overrides %>
+			  <% else %>
+			    <% _btns.push ({
+			                    text: "Новый",
+			                    class: "btn btn-primary",
+			                    url: url_for([:new, @resource, nested.to_s.singularize, format: :js, scope: @parent_scope])
+			                  }) if can?(:update, @resource => nested_class) && nested_class.edit_directory_fields.present? %>
+			    <% _btns.push ({
+			                    text: "Изменить",
+			                    class: "btn btn-default",
+			                    url: "#{ url_for([@resource, nested_class]) }/${dt.rows( { selected: true } ).data()[0].id}/edit.js?scope=#{@parent_scope}"
+			                  }) if can?(:update, @resource => nested_class) && nested_class.edit_directory_fields.present? %>
+			  <% end %>
+			<% end %>
+			<%# byebug %>
+			<%= datatable_widget :"crud-#{nested_class_name.to_url}",
+													 icon: "fa-table",
+													 title: t(:"directory.#{nested_class_name.underscore}.title"),
+													 source_url: (url_for([@parent_scope, @resource, nested_class, datatables: true, format: :json]) rescue directories_url(nested_class, datatables: true, format: :json)),
+													 columns:  directory_columns_for(nested_class, _nested_fields),
+													 buttons: _btns do %>
+
+					<thead>
+						<tr>
+							<% _nested_fields.each do |field| %>
+								<% if field.is_a?(Hash) %>
+									<% field[field.keys.first].each do |subfield| %>
+										<th><%= t(:"directory.#{@resource_class.name.underscore}.#{nested_class.name.underscore}.#{field.keys.first}.fields.#{subfield}") %></th>
+									<% end %>
+								<% else %>
+									<th><%= t(:"directory.#{@resource_class.name.underscore}.#{nested_class.name.underscore}.fields.#{field}") %></th>
+								<% end %>
+							<% end %>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+
+			<% end %>
+
+	</p>
+</div>

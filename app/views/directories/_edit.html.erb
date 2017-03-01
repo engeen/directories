@@ -1,0 +1,45 @@
+<div id='edit_<%=  dom_id(resource) %>' class="modal fade">
+<div  class="modal-dialog large">
+  <% options = { remote: true, method: :put, html: { multipart: true, class: "form-horizontal" }} %>
+  <%
+    options.merge!( {
+      url: begin
+        update_url
+      rescue
+        url_for([(@parent_resource || @parent_scope), @resource]) rescue directory_url(@resource_class.name.underscore, @resource)
+      end
+      }
+    )
+
+  %>
+
+  <% puts options %>
+
+  <%= form_for resource, options do |f| %>
+
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+        ×
+      </button>
+      <h4 class="modal-title"><%= t("directory.#{@parent_resource ? @parent_resource.class.name.underscore + '.' : ''}#{resource.class.name.underscore}.edit.title") %></h4>
+    </div>
+    <div class="modal-body">
+
+        <%= render "#{resource.class.name.underscore.pluralize}/form", resource: resource, f: f rescue render "directories/form", resource: resource, f: f  %>
+        <%= render inject_form, resource: resource, f: f  if defined?(inject_form) %>
+
+    </div>
+    <div class="modal-footer">
+      <%= link_to t(:'shared.buttons.delete'),
+       (delete_url rescue ( url_for([(@parent_resource || @parent_scope), @resource] ) rescue directory_url(@resource_class.name.underscore, @resource) ) ),
+       method: :delete, remote: true, data: {confirm: t("directory.#{@parent_resource ? @parent_resource.class.name.underscore + '.' : ''}#{resource.class.name.underscore}.delete.confirmation", default: t('shared.confirmations.delete')) }, class: "btn btn-danger pull-left" %>
+      <button type="button" class="btn btn-default" data-dismiss="modal">
+        <%= t(:'shared.buttons.cancel') %>
+      </button>
+      <%= f.submit t(:'shared.buttons.save'), class: "btn btn-primary" %>
+    </div>
+  </div><!-- /.modal-content -->
+  <% end %>
+</div>
+</div>

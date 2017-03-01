@@ -1,0 +1,15 @@
+<%= n.hidden_field :id %>
+
+<% field[field.keys.first].each do |subfield| %>
+	<% next if subfield == :id %>
+	<div class='form-group <%= "has-error" if n.object.errors[subfield].any? if n.object%>'>
+		<%= n.label subfield.to_sym, class: "col-md-2 text-right" %>
+		<div class='col-md-10'>
+			<%= n.text_field subfield.to_sym, class: "form-control", disabled: n.object.try(:persisted?) %>
+
+			<% if n.object.errors[subfield].any? %>
+				<div class="note note-error"><%= n.object.errors[subfield] %></div>
+			<% end if n.object %>
+		</div>
+	</div>
+<% end %>

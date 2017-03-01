@@ -1,0 +1,10 @@
+<% if field.is_a?(Hash) %>
+	<% field[field.keys.first].each do |subfield| %>
+		<%= render "directories/show_info_subfields", scope: "#{scope}.#{field.keys.first}" ,field: subfield, resource: resource.send(field.keys.first), resource_class: resource_class.reflect_on_association(field.keys.first).class_name.constantize if resource.send(field.keys.first) %>
+	<% end %>
+<% else %>
+	<tr>
+		<th style='width: <%= defined?(title_col_width) ? title_col_width : "120px" %>' class='text-right'><%= t(:"#{scope}.fields.#{field}") %></th>
+		<td><%= directory_template_exist?("s_show_item_#{field}", locals: { resource: resource }, formats: [:html]) ? directory_render("s_show_item_#{field}", locals: { resource: resource }, formats: [:html]) : resource.try(field) %></td>
+	</tr>
+<% end %>

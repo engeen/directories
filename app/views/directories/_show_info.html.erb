@@ -1,0 +1,26 @@
+
+	<%# byebug %>
+	<% @resource_class.directory_show.each_with_index do |group,index| %>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<a data-toggle="collapse" data-parent="#<%= @resource_class.name.to_url %>_<%= @resource.id %>_accordion" href="#<%= @resource_class.name.to_url %>_<%= @resource.id %>_accordion_<%= index %>" aria-expanded="<%= index==0 ? "true" : "false" %>" class="<%= "collapsed" if index > 0%>"> <i class="fa fa-lg fa-angle-down pull-right"></i> <i class="fa fa-lg fa-angle-up pull-right"></i>
+					<%= t(:"directory.#{@resource.class.name.underscore}.fields.#{group.keys.first}") %> </a></h4>
+			</div>
+
+			<div id="<%= @resource_class.name.to_url %>_<%= @resource.id %>_accordion_<%= index %>" class="panel-collapse collapse <%= index==0 ? "in" : "" %>" aria-expanded="<%= index == 0 ? "true" : "false"%>">
+				<div class="panel-body no-padding">
+					<table class="table table-bordered table-condensed">
+						<tbody>
+							<% group[group.keys.first].each do |field| %>
+									<%= render "directories/show_info_subfields", scope: "directory.#{@resource_class.name.underscore}" ,field: field, resource: @resource, resource_class: @resource.class, title_col_width: (title_col_width rescue "120px") %>
+							<% end %>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+
+		</div>
+
+	<% end %>

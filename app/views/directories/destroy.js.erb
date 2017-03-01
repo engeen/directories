@@ -1,0 +1,24 @@
+<% if @resource.persisted? && @resource.deleted_at.nil? %>
+	alert("Не удалось удалить объект")
+<% else %>
+  <%
+      puts '-------------------------------------------'
+      puts @resource
+      puts @resource.class
+      puts '-------------------------------------------'
+  %>
+	console.log("!");
+
+ if ($('#edit_<%= dom_id(@resource) %>').length ) {
+	$('#edit_<%= dom_id(@resource) %>').modal( 'hide' );
+	$('.modal-backdrop').remove();
+  $('.modal-open').removeClass('modal-open');
+ }
+	var _table = $('.crud-<%= @resource.class.name.to_url %>_table').dataTable().api();
+	_table.row(`#row_${<%= @resource.id %>}`).remove().draw();
+  var $badge = $('ul.nav-tabs > li.active .badge');
+  var amount = parseInt($badge.text()) - 1;
+  $badge.html(amount);
+<% end %>
+$("#info_panel").html('');
+$("#info_panel").html('<%= j capture { flash_messages } %>');

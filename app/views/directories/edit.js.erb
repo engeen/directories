@@ -1,0 +1,12 @@
+<% if flash[:error].present? %>
+$("#info_panel").html('<%= j capture { flash_messages } %>');
+<% else %>
+const renderString = '<%= j render "edit", resource: @resource %>';
+var dom_id ='#edit_<%= dom_id(@resource) %>';
+if ($(dom_id).length > 0) {
+	$(dom_id).replaceWith(renderString);
+} else {
+	$('#content').append(renderString);
+}
+$(dom_id).modal();
+<% end %>

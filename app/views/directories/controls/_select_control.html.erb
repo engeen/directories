@@ -1,0 +1,2 @@
+<% collection = _chash[:collection].is_a?(Proc) ? _chash[:collection].call : _chash[:collection] %>
+<%= f.select field, collection, { :include_blank => 'Выберите из списка' }.merge(select_options(f, field, _chash)), class: "form-control", disabled: _chash[:disabled]%>

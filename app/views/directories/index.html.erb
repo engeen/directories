@@ -1,0 +1,67 @@
+<%= render "common/content_header",  _directory_attrs %>
+<div id="info_panel">
+  <%= capture { flash_messages } %>
+</div>
+
+<!-- widget grid -->
+<section id="widget-grid" class="">
+
+	<!-- row -->
+	<div class="row">
+		<!-- NEW WIDGET START -->
+    <%# byebug %>
+
+		<% _btns = [] %>
+		<% _btns.push ({
+								 		text: "Новый",
+								 		class: "btn btn-primary",
+								 		url: (url_for([:new, @parent_scope, @resource_class.name.singularize.to_url, format: :js]) rescue new_directory_url(@resource_class.name.underscore))
+								 	}) if can? :create, @resource_class %>
+		<% _btns.push ({
+								 		text: "Изменить",
+								 		class: "btn btn-default",
+								 		url: "#{ (url_for([ @parent_scope, @resource_class.name.to_url, {id:''}]) rescue directories_url(@resource_class.name.underscore)) }/${dt.rows( { selected: true } ).data()[0].id}/edit.js"
+								 	}) if can? :update, @resource_class %>
+
+		<% _btns = get_directory_buttons || _btns %>
+
+		<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			<%= datatable_widget :"crud-#{@resource_class.name.to_url}",
+													 icon: "fa-table",
+													 title: t(:"directory.#{@resource_class.name.to_url}.title"),
+													 source_url: (url_for([@parent_scope || @parent_resource, @resource_class, datatables: true, format: :json, scope: @parent_scope]) rescue directories_url(@resource_class.name.underscore, datatables: true, format: :json)),
+													 columns: directory_columns_for(@resource_class),
+													 buttons: _btns do %>
+					<thead>
+						<tr>
+							<% (controller.display_overrides_for(@resource_class) || @resource_class.directory_fields).each do |field| %>
+								<% if field.is_a?(Hash) %>
+									<% field[field.keys.first].each do |subfield| %>
+										<th><%= t(:"directory.#{@resource_class.name.underscore}.#{field.keys.first}.fields.#{subfield}") %></th>
+									<% end %>
+								<% else %>
+									<th><%= t(:"directory.#{@resource_class.name.underscore}.fields.#{field}") %></th>
+								<% end %>
+							<% end %>
+
+
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+
+			<% end %>
+
+
+
+		</article>
+	</div>
+</section>
+<% if params.has_key?(:client_action) %>
+<script>
+function perform_client_action() {
+	$('a:contains("<%= params[:client_action] %>")').trigger('click');
+}
+onLoad(perform_client_action);
+</script>
+<% end %>

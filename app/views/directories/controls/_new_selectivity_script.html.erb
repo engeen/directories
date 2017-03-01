@@ -1,0 +1,36 @@
+<script>
+function bindSelect_<%= field_id_for(builder,field) %>() {
+<%
+
+ nested = resource.class.edit_directory_fields.select{|f| f.is_a?(Hash) }.inject(Hash.new) {|r,e| r[e.keys.first] = (e[e.keys.first] + (r[e.keys.first] || [])).uniq; r}
+ reflections = resource.class.reflections.select do |association_name, reflection|
+  reflection.macro == :belongs_to &&  resource.class.edit_directory_fields.include?(reflection.name)
+ end
+
+ reflection = resource.class.reflect_on_association(field)
+ association_name = field
+ # reflections.each do |association_name,reflection|
+ # 	next unless @_selectivities.include?(association_name.to_sym)
+
+ %>
+
+  const onSuccess = function (e) {
+    const value = getSelectivityValue(e);
+    $('#<%= field_id_for(builder,field) %>_id').val(value);
+
+    <% if defined?(_chash) && _chash &&  _chash.has_key?(:reload) %>
+	    var _form = $('#<%= field_id_for(builder,field) %>_id').parents('form');
+	    $(_form).append('<input type="hidden" name="just_validate" value="true" />');
+	    $(_form).submit();
+    <% end %>
+  };
+
+
+
+  applySelectivity(`#<%= field_id_for(builder,field) %>_select`, (e) => onSuccess(e), { placeholder: "", url: "<%= _chash[:url] rescue url_for([reflection.class_name.constantize, format: :json]) %>" }, true, true, false);
+  $('#<%= field_id_for(builder,field) %>_select').on('change', function (e) {
+    $(this).trigger('selectivity:change', {value: e.value} );
+  });
+}
+onLoad(<%= "bindSelect_#{ field_id_for(builder,field) }" %>);
+</script>

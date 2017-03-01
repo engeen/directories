@@ -1,0 +1,20 @@
+const renderString = '<%= j render("new", resource: @resource) %>';
+var dom_id = '#<%= dom_id(@resource) %>';
+
+if ($(dom_id).length > 0) {
+	try {
+		$(dom_id).replaceWith(renderString);
+	}
+	catch(err) {
+	}
+
+} else
+{
+	try {
+		$('#content').append(renderString);
+	}
+	catch (err)
+	{
+	}
+}
+$(dom_id).modal('show');

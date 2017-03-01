@@ -1,0 +1,7 @@
+en:
+  shared:
+    buttons:
+      create: Create
+      save: Save
+    confirmations:
+      delete: Are you sure?

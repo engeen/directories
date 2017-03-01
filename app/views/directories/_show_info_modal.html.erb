@@ -1,0 +1,36 @@
+<div id='show_<%=  dom_id(resource) %>' class="modal fade">
+  <div  class="modal-dialog large">
+    <% options = { remote: true, method: :put, html: {class: "form-horizontal"}} %>
+    <%
+      options.merge!( {
+        url: begin
+          update_url
+        rescue
+          url_for([(@parent_resource || @parent_scope), @resource])
+        rescue
+          directory_url(@resource_class.name.underscore, @resource)
+        end
+        }
+      )
+
+    %>
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+          ×
+        </button>
+        <h4 class="modal-title"><%= t(:"directory.#{ resource.class.name.underscore}.edit.title") %></h4>
+      </div>
+      <div class="modal-body">
+
+        <%= directory_render "show_info", resource: resource %>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">
+          <%= t(:'shared.buttons.cancel') %>
+        </button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div>
+</div>

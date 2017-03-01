@@ -1,0 +1,52 @@
+<script>
+function bindSelectBelongsTo_<%= resource.class.name.underscore %>() {
+<%
+
+ nested = resource.class.edit_directory_fields.select{|f| f.is_a?(Hash) }.inject(Hash.new) {|r,e| r[e.keys.first] = (e[e.keys.first] + (r[e.keys.first] || [])).uniq; r}
+ reflections = resource.class.reflections.select do |association_name, reflection|
+  reflection.macro == :belongs_to &&  resource.class.edit_directory_fields.include?(reflection.name)
+ end
+ reflections.each do |association_name,reflection|
+ 	next unless @_selectivities.include?(association_name.to_sym)
+
+ %>
+
+  const onSuccess = function (e) {
+    const value = getSelectivityValue(e);
+    console.log(value);
+    if (value == null) {
+				<% nested[reflection.name].each do |subfield| %>
+					var el = $('#<%= resource.class.name.underscore%>_<%= association_name %>_attributes_<%= subfield %>');
+					el.val("");
+					el.removeAttr('disabled');
+				<% end if nested.has_key?(reflection.name)%>
+				return;
+		}
+
+
+    $('#<%= resource.class.name.underscore %>_<%= association_name %>_id').val(value);
+
+		<% if nested.has_key?(reflection.name) %>
+			$.ajax({
+				url: `<%= URI.unescape(url_for([reflection.class_name.underscore.to_sym, id: '${value}'.html_safe, format: :json])) %>`,
+				method: 'GET',
+				dataType: 'json'
+			}).done(function(response) {
+				<% nested[reflection.name].each do |subfield| %>
+					var el = $('#<%= resource.class.name.underscore%>_<%= association_name %>_attributes_<%= subfield %>');
+					el.val(response.<%= subfield %>);
+					el.attr('disabled', 'disabled');
+				<% end %>
+			});
+		<% end %>
+
+  };
+
+
+applySelectivity(`#<%= association_name %>_select`, (e) => onSuccess(e), { placeholder: "", url: "<%= url_for([reflection.class_name.constantize, format: :json]) %>" });
+<% end %>
+
+}
+
+onLoad(<%= "bindSelectBelongsTo_#{ resource.class.name.underscore }" %>);
+</script>
