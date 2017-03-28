@@ -223,7 +223,7 @@ class DirectoriesController < ApplicationController
 
   def set_title
     if @resource_class.present?
-      @page_title = t("common.pages.titles.#{@resource_class.name.pluralize.underscore}.#{params[:action]}.title", default: "АСУ ММП Оборонлогистика")
+      @page_title = t("common.pages.titles.#{@resource_class.name.pluralize.underscore}.#{params[:action]}.title", default: "directories")
       @page_subtitle = t("common.pages.titles.#{@resource_class.name.pluralize.underscore}.#{params[:action]}.subtitle", resource: (@resource.respond_to?(:number) ? @resource.number : @resource.name rescue ''), default: '')
       @page_subtitle = nil unless @page_subtitle.present?
     end

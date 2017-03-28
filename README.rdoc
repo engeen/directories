@@ -1,3 +1,8 @@
 = Directories
 
 This project rocks and uses MIT-LICENSE.
+
+Authors: 
+Yuriy Novikov jv.novikov@gmail.com
+Alexey Nureev
+Maxat Nazarmatov
